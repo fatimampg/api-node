@@ -1,0 +1,64 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String    @id @default(uuid()) //uuid - generates a global unique identifier based on UUID (can't have more than 1 id)
+  createdAt DateTime  @default(now()) //now() sets a timestamp of the time when created
+  username  String    @unique //@unique attribut defines a unique constraint for this field
+  password  String
+  products  Product[] //when creating user, althought Products are required (there is no ?), it can be an empty array. (relation: one to may (one user can have several products))
+}
+
+model Product {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+
+  name        String   @db.VarChar(255)
+  belongsToId String
+  belongsTo   User     @relation(fields: [belongsToId], references: [id]) //Type User. belongsToId holds the relation. It references the id field from the User
+  updates     Update[]
+  @@unique([id, belongsToId]) // create composite index containing id and belongsToId (usefull for filtering or sorting)
+
+}
+
+enum UPDATE_STATUS {
+  IN_PROGRESS
+  SHIPPED
+  DEPRECATED
+}
+
+model Update {
+  id        String        @id @default(uuid())
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  title     String
+  body      String
+  status    UPDATE_STATUS @default(IN_PROGRESS)
+  version   String? //? means optional
+  asset     String?
+
+  productId   String
+  product     Product       @relation(fields: [productId], references: [id])
+  updatePoints UpdatePoint[]
+}
+
+model UpdatePoint {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime
+
+  name        String @db.VarChar(255)
+  description String
+
+  updateId String
+  update   Update @relation(fields: [updateId], references: [id])
+}
