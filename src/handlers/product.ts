@@ -28,15 +28,19 @@ export const getOneProduct = async (req, res) => {
 };
 
 // ------------- Create a product -------------
-export const createProduct = async (req, res) => {
-  // Prisma schema --> model is named Product. The corresponding Prisma client methods will be named using the lowercase "product"
-  const product = await prisma.product.create({
-    data: {
-      name: req.body.name, // name available in the JSON data in the request body (POST request - route handler)
-      belongsToId: req.user.id,
-    },
-  });
-  res.json({ data: product });
+export const createProduct = async (req, res, next) => {
+  try {
+    // Prisma schema --> model is named Product. The corresponding Prisma client methods will be named using the lowercase "product"
+    const product = await prisma.product.create({
+      data: {
+        name: req.body.name, // name available in the JSON data in the request body (POST request - route handler)
+        belongsToId: req.user.id,
+      },
+    });
+    res.json({ data: product });
+  } catch (e) {
+    next(e);
+  }
 };
 
 // ------------- Update a product -------------

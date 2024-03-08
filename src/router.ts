@@ -104,4 +104,10 @@ router.post(
 // Delete a specific updatepoint:
 router.delete("/updatepoint/:id", () => {});
 
+// To ensure I get the errors associated to product or update:
+router.use((err, req, res, next) => {
+  console.log(err);
+  res.json({ message: "in router handler" });
+}); // (the default error handler is on server.js, which only includes handlers for user (not for products and updates)). 
+
 export default router;
